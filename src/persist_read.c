@@ -24,6 +24,7 @@ Contributors:
 #include <arpa/inet.h>
 #endif
 #include <assert.h>
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -480,7 +481,7 @@ int persist__restore(void)
 						fclose(fptr);
 						return 1;
 					}
-					db.last_db_id = cfg_chunk.last_db_id;
+					db.last_db_id = le64toh(cfg_chunk.last_db_id);
 					break;
 
 				case DB_CHUNK_MSG_STORE:

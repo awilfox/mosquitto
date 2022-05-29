@@ -24,6 +24,7 @@ Contributors:
 #include <arpa/inet.h>
 #endif
 #include <assert.h>
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -100,6 +101,7 @@ int persist__chunk_client_msg_write_v6(FILE *db_fptr, struct P_client_msg *chunk
 
 	chunk->F.mid = htons(chunk->F.mid);
 	chunk->F.id_len = htons(chunk->F.id_len);
+	chunk->F.store_id = htole64(chunk->F.store_id);
 
 	header.chunk = htonl(DB_CHUNK_CLIENT_MSG);
 	header.length = htonl((uint32_t)sizeof(struct PF_client_msg) + id_len + proplen);
@@ -149,6 +151,7 @@ int persist__chunk_message_store_write_v6(FILE *db_fptr, struct P_msg_store *chu
 		proplen += property__get_remaining_length(chunk->properties);
 	}
 
+	chunk->F.store_id = htole64(chunk->F.store_id);
 	chunk->F.payloadlen = htonl(chunk->F.payloadlen);
 	chunk->F.source_mid = htons(chunk->F.source_mid);
 	chunk->F.source_id_len = htons(chunk->F.source_id_len);
@@ -206,6 +209,7 @@ int persist__chunk_retain_write_v6(FILE *db_fptr, struct P_retain *chunk)
 
 	header.chunk = htonl(DB_CHUNK_RETAIN);
 	header.length = htonl((uint32_t)sizeof(struct PF_retain));
+	chunk->F.store_id = htole64(chunk->F.store_id);
 
 	write_e(db_fptr, &header, sizeof(struct PF_header));
 	write_e(db_fptr, &chunk->F, sizeof(struct PF_retain));

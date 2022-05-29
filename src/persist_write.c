@@ -273,7 +273,7 @@ static int persist__retain_save(FILE *db_fptr, struct mosquitto__retainhier *nod
 
 	if(node->retained && strncmp(node->retained->topic, "$SYS", 4)){
 		/* Don't save $SYS messages. */
-		retain_chunk.F.store_id = node->retained->db_id;
+		retain_chunk.F.store_id = htole64(node->retained->db_id);
 		rc = persist__chunk_retain_write_v6(db_fptr, &retain_chunk);
 		if(rc){
 			return rc;
@@ -367,7 +367,7 @@ int persist__backup(bool shutdown)
 	write_e(db_fptr, &db_version_w, sizeof(uint32_t));
 
 	memset(&cfg_chunk, 0, sizeof(struct PF_cfg));
-	cfg_chunk.last_db_id = db.last_db_id;
+	cfg_chunk.last_db_id = htole64(db.last_db_id);
 	cfg_chunk.shutdown = shutdown;
 	cfg_chunk.dbid_size = sizeof(dbid_t);
 	if(persist__chunk_cfg_write_v6(db_fptr, &cfg_chunk)){

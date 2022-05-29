@@ -24,6 +24,7 @@ Contributors:
 #include <arpa/inet.h>
 #endif
 #include <assert.h>
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -116,6 +117,7 @@ int persist__chunk_client_msg_read_v56(FILE *db_fptr, struct P_client_msg *chunk
 	read_e(db_fptr, &chunk->F, sizeof(struct PF_client_msg));
 	chunk->F.mid = ntohs(chunk->F.mid);
 	chunk->F.id_len = ntohs(chunk->F.id_len);
+	chunk->F.store_id = le64toh(chunk->F.store_id);
 
 	length -= (uint32_t)(sizeof(struct PF_client_msg) + chunk->F.id_len);
 
@@ -165,6 +167,7 @@ int persist__chunk_msg_store_read_v56(FILE *db_fptr, struct P_msg_store *chunk, 
 	chunk->F.source_username_len = ntohs(chunk->F.source_username_len);
 	chunk->F.topic_len = ntohs(chunk->F.topic_len);
 	chunk->F.source_port = ntohs(chunk->F.source_port);
+	chunk->F.store_id = le64toh(chunk->F.store_id);
 
 	length -= (uint32_t)(sizeof(struct PF_msg_store) + chunk->F.payloadlen + chunk->F.source_id_len + chunk->F.source_username_len + chunk->F.topic_len);
 
@@ -246,6 +249,7 @@ int persist__chunk_retain_read_v56(FILE *db_fptr, struct P_retain *chunk)
 		log__printf(NULL, MOSQ_LOG_ERR, "Error: %s.", strerror(errno));
 		return 1;
 	}
+	chunk->F.store_id = le64toh(chunk->F.store_id);
 	return MOSQ_ERR_SUCCESS;
 }
 

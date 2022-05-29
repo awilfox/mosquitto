@@ -24,6 +24,7 @@ Contributors:
 #include <arpa/inet.h>
 #endif
 #include <assert.h>
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -108,6 +109,7 @@ int persist__chunk_client_msg_read_v234(FILE *db_fptr, struct P_client_msg *chun
 	}
 
 	read_e(db_fptr, &chunk->F.store_id, sizeof(dbid_t));
+	chunk->F.store_id = le64toh(chunk->F.store_id);
 
 	read_e(db_fptr, &i16temp, sizeof(uint16_t));
 	chunk->F.mid = ntohs(i16temp);
@@ -137,6 +139,7 @@ int persist__chunk_msg_store_read_v234(FILE *db_fptr, struct P_msg_store *chunk,
 	char *err;
 
 	read_e(db_fptr, &chunk->F.store_id, sizeof(dbid_t));
+	chunk->F.store_id = le64toh(chunk->F.store_id);
 
 	rc = persist__read_string(db_fptr, &chunk->source.id);
 	if(rc){
@@ -205,7 +208,7 @@ int persist__chunk_retain_read_v234(FILE *db_fptr, struct P_retain *chunk)
 		log__printf(NULL, MOSQ_LOG_ERR, "Error: %s.", err);
 		return 1;
 	}
-	chunk->F.store_id = i64temp;
+	chunk->F.store_id = le64toh(i64temp);
 
 	return MOSQ_ERR_SUCCESS;
 }
